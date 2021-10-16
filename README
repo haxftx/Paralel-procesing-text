@@ -1,0 +1,75 @@
+Procesor de text distribuit: procesarea unui text cu ajutorul mpi si threads
+in 4 tipuri: horror(consoane dublate), comedy(litera de pe pozitie para cu
+majuscula), fantasy(prima litera a fiecarui cuvant majuscula), science-fiction
+(fiecare al 7-lea cuvnat inversat).
+Pentru implementare am pornit de la MPI, le initializez si dupa se executa in
+dependeta de MASTER, WORKER. 
+MASTER - creeaza 4 thread-uri care citesc textul, impart in paragrafe si le
+         trimite catre WORKER-i.
+WORKER - creeaza maxim thread-uri de pe PC in care unul primeste si trimite
+         paragrafele catre MASTER, iar restul il proceseaza.
+Un thread de pe MASTER - citeste 1/4 din fisier, apoi creeaza textul in
+intregime, fiecare i-si iau paragrafe cu care trebuie sa lucreze, salvandu-si
+local aceste paragrafe, dupa care le trimite catre WORKER-l asociat, apoi
+asteapta aceste paragrafe procesate. La final le scriu in fisier, in ordinea
+in care au fost citite.
+Un thread de pe WORKER - thread-l cu id 0 primeste de la MASTER paragrafele pe
+rand, afla tipul paragrafului si imparte cate un multiplu de 20 intr-un mod cat
+mai egal pentru celalte thread-uri, dupa impartire fiecare thread i-si
+proceseaza datele, apoi thread-l 0 le concateneaza si trimite inapoi catre 
+MASTER.
+
+main() - creeaza si porneste thred-urile.
+add_final_size() - verifica daca fisierul se termina cu "\n\n", daca adauga
+                   string-l respectiv, si calculeaza dimensiunea fisierului.
+count_line() - calculeaza numarul de linii dintr-un string.
+create_output() - dupa numele fisierului de intrare creeaza numele fisierului
+                  de iesire.
+is_cons_UP() - verifica daca un caracter este consoana majuscula.
+is_cons_LOW() - verifica daca un caracter este consoana minuscula.
+f_horror() - ia un string si-i dubleaza toate consoanele cu litere minuscule.
+f_comedy() - ia un string si la fiecare litera dintr-un cuvant de pe pozitie
+             para devine majuscula.
+f_fantasy() - ia un string si la fiecare cuvant face prima litera in majuscula.
+f_science() - ia un string si la fiecare al 7-lea cuvnat de pe o linie este
+              inversat.
+procesare_text() - in dependeta de tipul paragrafului modifica textul.
+split_paragraf() - imparte un paragraf dupa linii, a cate linii ii revine
+                   unui thread.
+merge_paragraf() - ia liniile din fiecare thread si creeaza paragraful procesat
+f() - funtia unui trhead de pe MASTER.
+g() - funtia unui thread de pe WORKER.
+
+scalabilitate:
+mpicc tema3.c -lpthread -o main
+
+~~~~~~~~~~~~~~~ ESTABLISHING BASE TIME ~~~~~~~~~~~~~~
+Test input1.txt took 0.008254289627075195 seconds
+Test input2.txt took 0.17766642570495605 seconds
+Test input3.txt took 0.5444455146789551 seconds
+Test input4.txt took 9.297235488891602 seconds
+Test input5.txt took 12.907105207443237 seconds
+
+~~~~~~~~~~~~~~~~~~~ RUNNING TESTS ~~~~~~~~~~~~~~~~~~~
+Test input1.txt took 0.5158944129943848 seconds
+Test input2.txt took 0.6763191223144531 seconds
+Test input3.txt took 0.5659773349761963 seconds
+Test input4.txt took 4.277218341827393 seconds
+Test input5.txt took 4.981379747390747 seconds
+
+~~~~~~~~~~~~~~~~~~~~~ COMPARING ~~~~~~~~~~~~~~~~~~~~~
+Test input1 is correct	SCORE = 2
+Test input2 is correct	SCORE = 4
+Test input3 is correct	SCORE = 6
+Test input4 is correct	SCORE = 8
+Test input5 is correct	SCORE = 10
+
+~~~~~~~~~~~~~ DOES IT READ IN PARALLEL? ~~~~~~~~~~~~~
+IT DOES
+SCORE = 10
+
+~~~~~~~~~~~~~~~~~~~ DOES IT SCALE? ~~~~~~~~~~~~~~~~~~
+IT DOES :)
+SCORE = 10
+
+Final grade =  10
